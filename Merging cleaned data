@@ -1,0 +1,78 @@
+clear all
+
+cd ""
+
+quietly log query
+capture `r(status)'
+if _rc==100 {
+    log close
+}
+
+log using "filename.log", replace 
+
+************************************************************************************************************************************************************************************************************************************************
+
+// In this step I am merging my appended to my crime data
+clear 
+
+use "appended_fixed_immgration", replace 
+merge 1:1 state_fips year using "crime_fixed.dta"
+
+
+drop if _merge != 3
+drop _merge
+
+order state_fips state_abbrev state year violentrate
+browse
+
+
+save "final_imm_data.dta", replace 
+
+************************************************************************************************************************************************************************************************************************************************
+
+
+// In this step I am adding last quarters DACA data 
+
+clear
+use "final_imm_data.dta", replace 
+
+
+describe
+sum
+
+use "fixed_daca_data.dta", replace 
+merge 1:1 state_fips year using "final_imm_data.dta"
+
+drop if _merge != 3
+drop _merge
+
+rename daca_recipient dacarecipient
+
+
+save "final_imm_data.dta", replace 
+
+************************************************************************************************************************************************************************************************************************************************
+
+// fixing varibales  
+
+clear 
+
+use  "final_imm_data.dta" 
+
+
+
+gen pop =  population/10000
+gen dacaperpop = dacarecipient/pop
+gen resperpop = perm_res/pop
+gen arrperpop = NewArrivals/pop 
+gen nonimmperpop = nonimmtotal/pop 
+gen natperpop = totalnaturalized/pop 
+gen refperpop = totalrefugees/pop
+gen asyleperpop = totalasylees/pop 
+
+
+
+
+save "clean_final_imm_data.dta",replace
+
+log close 
