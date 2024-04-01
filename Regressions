@@ -1,0 +1,163 @@
+clear all
+
+cd ""
+
+quietly log query
+capture `r(status)'
+if _rc==100 {
+    log close
+}
+
+log using "", replace 
+
+ 
+************************************************************************************************************************************
+************************************************************************************************************************************
+
+// A. Regressing the violent crime rate on the permanent resident. Comment again on whether or not the E(U|X) = 0.
+
+
+clear 
+
+use "clean_final_imm_data.dta" 
+
+gen 
+reg violentrate 
+reg violentrate 
+
+
+reg violentrate pop
+outreg2 using "final.doc", replace ///
+ title(" Avg. Violent Crime on Avg. Immigration.") ///
+ ctitle (Violent Crime Rate) /// 
+ addtext(State FE, no) ///
+ addnote(" FE: Fixed Affect ")
+ 
+
+ 
+reg violentrate resperpop , r
+outreg2 using "final.doc", append ///
+ ctitle (Violent Crime Rate) /// 
+ addtext(Year FE, no )
+
+
+
+
+
+
+************************************************************************************************************************************************************************************************************************************************
+
+//B. Regress the violent crime rate on the immigration rate and state dummies only using this approach.
+
+
+areg violentrate resperpop, robust absorb(state)
+outreg2 using "final.doc", append ///
+ ctitle (Violent Crime Rate) /// 
+ addtext(State FE, yes )
+
+************************************************************************************************************************************************************************************************************************************************
+
+//C. Regress the violent crime rate on the immigration rate and year dummies only using this approach
+
+areg violentrate resperpop, robust absorb(year)
+outreg2 using "final.doc", append ///
+ ctitle (Violent Crime Rate) /// 
+ addtext(Year FE, yes )
+
+************************************************************************************************************************************************************************************************************************************************
+
+//D. Regressing Perm Res on state and fixed affects 
+ 
+reghdfe violentrate resperpop , absorb(state year) vce(robust)
+outreg2 using "final.doc", append ///
+ ctitle (Violent Crime Rate) /// 
+ addtext(State FE, state and year ) 
+ 
+ 
+ 
+************************************************************************************************************************************************************************************************************************************************
+
+//C. Regressing all variables
+
+reg violentrate resperpop dacaperpop arrperpop nonimmperpop natperpop refperpop asyleperpop
+outreg2 using "test.doc", replace
+
+
+************************************************************************************************************************************************************************************************************************************************
+
+
+
+
+
+
+//D. Regressing all variables with state and fixed affects 
+
+
+reghdfe violentrate resperpop dacaperpop arrperpop nonimmperpop natperpop refperpop asyleperpop, absorb(state year) vce(robust)
+label variable pop "Population" 
+label variable resperpop "Permanent Recipient"
+label variable dacaperpop " DACA "
+label variable arrperpop "New Arrivals "
+label variable nonimmperpop "Non immigrants"
+label variable natperpop "Naturalized Citizen"
+label variable refperpop "Refugee"
+label variable asyleperpop "Asylee"
+outreg2 using "test.doc", append ///
+label /// 
+ ctitle (Violent Crime Rate) /// 
+ addtext(State FE, state and year )
+
+ 
+
+
+
+ 
+ 
+stop
+
+reg violentrate dacaperpop
+outreg2 using "final.doc", append
+
+
+ 
+reg violentrate resperpop
+
+stop
+ twoway (scatter violentrate pop ) (lfit violentrate pop )
+
+reg violentrate pop perm_res resperpop
+
+twoway scatter violentrate resperpop 
+
+reg violentrate pop perm_res resperpop NewArrivals 
+
+ twoway scatter violentrate NewArrivals 
+
+
+reg violentrate pop perm_res resperpop NewArrivals nonimmtotal 
+
+  twoway scatter violentrate nonimmtotal 
+
+ 
+reg violentrate pop perm_res resperpop NewArrivals nonimmtotal totalnaturalized
+
+ twoway scatter violentrate totalnaturalized 
+ 
+  
+
+reg violentrate pop perm_res resperpop NewArrivals nonimmtotal totalnaturalized totalrefugees 
+
+ twoway scatter violentrate totalrefugees 
+
+reg violentrate resperpop NewArrivals nonimmtotal totalnaturalized totalrefugees totalasylees 
+
+reg violentrate dacaperpop resperpop arrperpop nonimmperpop natperpop refperpop asyleperpop 
+
+************************************************************************************************************************************************************************************************************************************************
+
+
+
+************************************************************************************************************************************************************************************************************************************************
+
+
+log close 
