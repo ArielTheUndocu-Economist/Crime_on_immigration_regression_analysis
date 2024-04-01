@@ -1,0 +1,54 @@
+clear all 
+
+cd ""
+
+quietly log query
+capture `r(status)'
+if _rc==100 {
+    log close
+}
+
+log using "location/file_name.log", replace 
+
+************************************************************************************************************************************************************************************************************************************************
+
+import delimited "DACA over time copy.csv"
+
+browse
+
+
+
+statastates, name(state) 
+
+encode ofdacarecipient, generate(daca_recipient)
+
+desc daca_recipient
+
+
+drop if _merge != 3
+drop _merge
+
+order state_fips state_abbrev state year ofdacarecipient 
+
+drop ofdacarecipient
+
+des 
+sum
+
+//duplicates list state_fips year
+duplicates drop state_fips year, force
+
+
+
+
+save "fixed_daca_data.dta", replace
+
+clear
+use "fixed_daca_data.dta"
+
+browse
+
+************************************************************************************************************************************************************************************************************************************************
+
+log close 
+
