@@ -1,0 +1,255 @@
+clear all
+
+cd ""
+
+quietly log query
+capture `r(status)'
+if _rc==100 {
+    log close
+}
+
+log using "", replace
+
+import excel using "2023_0824_plcy_state_immigration_data_sheets_fy2022.xlsx" 
+
+browse
+
+*****************************************************************************************************************************
+*****************************************************************************************************************************
+
+// Step 2 creates macro so extract the specific data from a rang of cell in different tabs on one excel sheet. 
+
+
+local excel_file "2023_0824_plcy_state_immigration_data_sheets_fy2022.xlsx"
+
+// List of all 50 states
+
+local states "Alabama Alaska Arizona Arkansas California Colorado Connecticut Delaware District_of_Columbia Florida Georgia 
+Hawaii Idaho Illinois Indiana Iowa Kansas Kentucky Louisiana Maine Maryland Massachusetts Michigan Minnesota Mississippi 
+Missouri Montana Nebraska Nevada New_Hampshire New_Jersey New_Mexico New_York North_Carolina North_Dakota Ohio Oklahoma Oregon 
+Pennsylvania Puerto_Rico Rhode_Island South_Carolina South_Dakota Tennessee Texas Utah Vermont Virginia Washington West_Virginia 
+Wisconsin Wyoming"
+
+display "`states'"
+
+
+foreach state in `states' {
+    import excel "2023_0824_plcy_state_immigration_data_sheets_fy2022.xlsx" , 
+                  sheet("`state'") cellrange(A5:P15) firstrow clear
+    rename Total perm_res
+rename A year
+rename B population
+drop Rank 
+drop F
+drop Adjustments
+drop H
+rename I nonimmtotal
+drop J
+rename K totalnaturalized
+drop L 
+rename M totalrefugees
+drop N 
+rename O totalasylees
+
+drop P
+gen state="`state'"
+
+    save "//`state'_immgration", replace
+}
+
+
+*****************************************************************************************************************************
+*****************************************************************************************************************************
+
+
+// Step 3 appended data 
+
+clear
+
+browse
+
+local states1 "Alabama Alaska Arizona Arkansas California Colorado Connecticut Delaware District_of_Columbia Florida Georgia Hawaii 
+Idaho Illinois Indiana Iowa Kansas Kentucky Louisiana Maine Maryland Massachusetts Michigan Minnesota Mississippi Missouri Montana 
+Nebraska Nevada New_Hampshire New_Jersey New_Mexico New_York North_Carolina North_Dakota Ohio Oklahoma Oregon Pennsylvania Puerto_Rico 
+Rhode_Island South_Carolina South_Dakota Tennessee Texas Utah Vermont Virginia Washington West_Virginia Wisconsin Wyoming"
+
+
+foreach state in `states1' {
+	
+append using "`state'_immgration.dta", force
+
+save "appended_immgration", replace
+
+}
+
+*****************************************************************************************************************************
+*****************************************************************************************************************************
+*****************************************************************************************************************************
+
+// Step 3 merged data 
+
+
+clear 
+
+use "//appended_immgration"
+browse
+
+
+replace state = "District of Columbia" in 81
+replace state = "District of Columbia" in 82
+replace state = "District of Columbia" in 83
+replace state = "District of Columbia" in 84
+replace state = "District of Columbia" in 85
+replace state = "District of Columbia" in 86
+replace state = "District of Columbia" in 87
+replace state = "District of Columbia" in 88
+replace state = "District of Columbia" in 89
+replace state = "District of Columbia" in 90
+
+replace state = "New Hampshire" in 291
+replace state = "New Hampshire" in 292
+replace state = "New Hampshire" in 293
+replace state = "New Hampshire" in 294
+replace state = "New Hampshire" in 295
+replace state = "New Hampshire" in 296
+replace state = "New Hampshire" in 297
+replace state = "New Hampshire" in 298
+replace state = "New Hampshire" in 299
+replace state = "New Hampshire" in 300
+
+replace state = "New Jersey" in 301
+replace state = "New Jersey" in 302
+replace state = "New Jersey" in 303
+replace state = "New Jersey" in 304
+replace state = "New Jersey" in 305
+replace state = "New Jersey" in 306
+replace state = "New Jersey" in 307
+replace state = "New Jersey" in 308
+replace state = "New Jersey" in 309
+replace state = "New Jersey" in 310
+
+replace state = "New York" in 321
+replace state = "New York" in 322
+replace state = "New York" in 323
+replace state = "New York" in 324
+replace state = "New York" in 325
+replace state = "New York" in 326
+replace state = "New York" in 327
+replace state = "New York" in 328
+replace state = "New York" in 329
+replace state = "New York" in 330
+
+replace state = "New Mexico" in 311
+replace state = "New Mexico" in 312
+replace state = "New Mexico" in 313
+replace state = "New Mexico" in 314
+replace state = "New Mexico" in 315
+replace state = "New Mexico" in 316
+replace state = "New Mexico" in 317
+replace state = "New Mexico" in 318
+replace state = "New Mexico" in 319
+replace state = "New Mexico" in 320
+
+replace state = "North Carolina" in 331
+replace state = "North Carolina" in 332
+replace state = "North Carolina" in 333
+replace state = "North Carolina" in 334
+replace state = "North Carolina" in 335
+replace state = "North Carolina" in 336
+replace state = "North Carolina" in 337
+replace state = "North Carolina" in 338
+replace state = "North Carolina" in 339
+replace state = "North Carolina" in 340
+
+replace state = "North Dakota" in 341
+replace state = "North Dakota" in 342
+replace state = "North Dakota" in 343
+replace state = "North Dakota" in 344
+replace state = "North Dakota" in 345
+replace state = "North Dakota" in 346
+replace state = "North Dakota" in 347
+replace state = "North Dakota" in 348
+replace state = "North Dakota" in 349
+replace state = "North Dakota" in 350
+
+replace state = "Puerto Rico" in 391
+replace state = "Puerto Rico" in 392
+replace state = "Puerto Rico" in 393
+replace state = "Puerto Rico" in 394
+replace state = "Puerto Rico" in 395
+replace state = "Puerto Rico" in 396
+replace state = "Puerto Rico" in 397
+replace state = "Puerto Rico" in 398
+replace state = "Puerto Rico" in 399
+replace state = "Puerto Rico" in 400
+
+replace state = "Rhode Island" in 401
+replace state = "Rhode Island" in 402
+replace state = "Rhode Island" in 403
+replace state = "Rhode Island" in 404
+replace state = "Rhode Island" in 405
+replace state = "Rhode Island" in 406
+replace state = "Rhode Island" in 407
+replace state = "Rhode Island" in 408
+replace state = "Rhode Island" in 409
+replace state = "Rhode Island" in 410
+
+replace state = "South Carolina" in 411
+replace state = "South Carolina" in 412
+replace state = "South Carolina" in 413
+replace state = "South Carolina" in 414
+replace state = "South Carolina" in 415
+replace state = "South Carolina" in 416
+replace state = "South Carolina" in 417
+replace state = "South Carolina" in 418
+replace state = "South Carolina" in 419
+replace state = "South Carolina" in 420
+
+replace state = "South Dakota" in 421
+replace state = "South Dakota" in 422
+replace state = "South Dakota" in 423
+replace state = "South Dakota" in 424
+replace state = "South Dakota" in 425
+replace state = "South Dakota" in 426
+replace state = "South Dakota" in 427
+replace state = "South Dakota" in 428
+replace state = "South Dakota" in 429
+replace state = "South Dakota" in 430
+
+replace state = "West Virginia" in 491
+replace state = "West Virginia" in 492
+replace state = "West Virginia" in 493
+replace state = "West Virginia" in 494
+replace state = "West Virginia" in 495
+replace state = "West Virginia" in 496
+replace state = "West Virginia" in 497
+replace state = "West Virginia" in 498
+replace state = "West Virginia" in 499
+replace state = "West Virginia" in 500
+
+statastates, name(state) 
+
+drop if _merge != 3
+drop _merge
+
+
+save "appended_fixed_immgration", replace
+
+browse
+
+
+*****************************************************************************************************************************
+*****************************************************************************************************************************
+*****************************************************************************************************************************
+
+clear 
+
+use "appended_fixed_immgration", replace 
+merge 1:1 state_fips year using "crime_fixed.dta"
+
+drop _merge
+drop if _merge != 3
+
+browse
+
+save "merged_data.dta", replace
